@@ -1,0 +1,981 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>William's Blog - I Hack So You Don't Have To</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #2d2d2d;
+            --text-primary: #a0a0a0;
+            --text-active: #e0e0e0;
+            --main-bg: #121212;
+            --border-color: #2a2a2a;
+            --accent-color: #00d4aa;
+            --card-bg: #1a1a1a;
+            --card-hover: #222;
+            --tag-hover-bg: #00d4aa;
+            --tag-hover-text: #121212;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--main-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Bar Loading Animation */
+        .bars-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--main-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .bars-animation.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .bar {
+            width: 8px;
+            height: 60px;
+            background: var(--accent-color);
+            margin: 0 4px;
+            border-radius: 4px;
+            animation: barWave 1.2s ease-in-out infinite;
+            animation-delay: calc(var(--i) * 0.1s);
+            opacity: 0.8;
+        }
+
+        @keyframes barWave {
+            0%, 100% { transform: scaleY(0.3); opacity: 0.3; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0 20px 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .profile-img {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            border: 2px solid #3a3a3a;
+        }
+
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #d0d0d0;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-tagline {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        /* Navigation */
+        .nav-menu {
+            width: 100%;
+            list-style: none;
+            padding: 0 15px;
+            flex: 1;
+        }
+
+        .nav-item { margin-bottom: 4px; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--sidebar-hover);
+            color: var(--text-active);
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+        }
+
+        .nav-link:hover .nav-icon, .nav-link.active .nav-icon { opacity: 1; }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        /* Social Links */
+        .social-links {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            justify-content: center;
+        }
+
+        .social-link {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 50%;
+            background-color: #2a2a2a;
+            transition: all 0.2s ease;
+        }
+
+        .social-link:hover {
+            background-color: #3a3a3a;
+            color: var(--text-active);
+            transform: translateY(-2px);
+        }
+
+        .social-link svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--text-active);
+            font-weight: 700;
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 42px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            color: var(--text-active);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-box input::placeholder {
+            color: #666;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #666;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .search-box input:focus ~ .search-icon,
+        .search-box:focus-within .search-icon {
+            color: var(--accent-color);
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+        }
+
+        /* Blog Feed */
+        .blog-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Blog Card */
+        .blog-card {
+            display: grid;
+            grid-template-columns: 1fr 220px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+            text-decoration: none;
+            color: inherit;
+            min-height: 0;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-2px);
+            border-color: #3a3a3a;
+        }
+
+        .blog-card-content {
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .blog-card-title {
+            font-size: 1.15rem;
+            color: var(--text-active);
+            margin-bottom: 8px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .blog-card-excerpt {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* === SVG META ICONS === */
+        .blog-card-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .blog-card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-icon {
+            width: 14px;
+            height: 14px;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .meta-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .blog-card-image {
+            width: 220px;
+            height: 100%;
+            min-height: 140px;
+            object-fit: cover;
+            background: #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .blog-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Sidebar Widgets */
+        .sidebar-widgets {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .widget {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .widget-title {
+            font-size: 1rem;
+            color: var(--text-active);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .recent-post {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+            text-decoration: none;
+            color: inherit;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .recent-post:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .recent-post-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #2a2a2a;
+            flex-shrink: 0;
+        }
+
+        .recent-post-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .recent-post-title {
+            font-size: 0.85rem;
+            color: var(--text-active);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .recent-post-date {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Tags */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            padding: 6px 14px;
+            background: #2a2a2a;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+        }
+
+        .tag:hover {
+            background: var(--tag-hover-bg);
+            color: var(--tag-hover-text);
+            border-color: var(--tag-hover-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.25);
+            font-weight: 600;
+        }
+
+        .tag-count {
+            margin-left: 4px;
+            opacity: 0.6;
+            transition: opacity 0.25s ease;
+        }
+
+        .tag:hover .tag-count {
+            opacity: 0.8;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-primary);
+        }
+
+        .empty-state h3 {
+            color: var(--text-active);
+            margin-bottom: 10px;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--main-bg); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-widgets {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .widget { flex: 1; min-width: 300px; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px; }
+            .menu-toggle { display: block; }
+            .blog-card { grid-template-columns: 1fr; }
+            .blog-card-image { width: 100%; height: 180px; }
+            .search-box { width: 100%; margin-top: 10px; }
+            .top-bar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Bar Loading Animation -->
+    <div class="bars-animation" id="loader">
+        <div class="bar" style="--i:1;"></div>
+        <div class="bar" style="--i:2;"></div>
+        <div class="bar" style="--i:3;"></div>
+        <div class="bar" style="--i:4;"></div>
+        <div class="bar" style="--i:5;"></div>
+        <div class="bar" style="--i:6;"></div>
+    </div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="profile-section">
+                <div class="profile-img">
+                    <img src="assets/profile.jpg" alt="William's Profile Picture">
+                </div>
+                <h2 class="profile-name">William's Blog</h2>
+                <p class="profile-tagline">I Hack So You Don't Have To</p>
+            </div>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link active" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2.1L1 12h3v8h6v-6h4v6h6v-8h3L12 2.1zm0 2.2l6 5.4V18h-2v-6h-4v6H8v-8.3l6-5.4z"/>
+                                </svg>
+                            </span>
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="categories.html" class="nav-link" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
+                                </svg>
+                            </span>
+                            Categories
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tags.html" class="nav-link" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+                                </svg>
+                            </span>
+                            Tags
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="archives.html" class="nav-link" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                </svg>
+                            </span>
+                            Archives
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="about.html" class="nav-link" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                </svg>
+                            </span>
+                            About
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="social-links">
+                <a href="https://github.com/illusive7ai" class="social-link" title="GitHub" target="_blank">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://twitter.com/yourusername" class="social-link" title="Twitter / X" target="_blank">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                </a>
+                <a href="mailto:williamkitungo@gmail.com" class="social-link" title="Email">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                </a>
+                <a href="https://www.linkedin.com/in/william-kitungo7" class="social-link" title="LinkedIn" target="_blank">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1 class="page-title">Home</h1>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search posts..." onkeyup="filterPosts()">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <!-- Blog Feed -->
+                <div class="blog-feed" id="blogFeed">
+                    <!-- Posts injected here by JavaScript -->
+                </div>
+
+                <!-- Right Sidebar Widgets -->
+                <div class="sidebar-widgets">
+                    <!-- Recently Updated -->
+                    <div class="widget">
+                        <h3 class="widget-title">Recently Updated</h3>
+                        <div id="recentlyUpdated">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Trending Tags -->
+                    <div class="widget">
+                        <h3 class="widget-title">Trending Tags</h3>
+                        <div class="tags-container" id="trendingTags">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============================================
+        // BLOG ENGINE - Client Side Markdown Loader
+        // ============================================
+
+        const POSTS_DIR = 'posts/';
+        const POLL_INTERVAL = 60000;
+        let allPosts = [];
+        let refreshInterval;
+
+        async function fetchPostsManifest() {
+            try {
+                const response = await fetch(POSTS_DIR + 'posts.json');
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (e) {
+                console.log('No posts.json manifest found, trying alternative...');
+            }
+            return null;
+        }
+
+        async function discoverPosts() {
+            const manifest = await fetchPostsManifest();
+            if (manifest && Array.isArray(manifest)) {
+                return manifest.map(file => POSTS_DIR + file);
+            }
+            console.warn('No posts.json manifest found. Please create one or enable directory listing.');
+            return [];
+        }
+
+        function parseFrontmatter(markdown) {
+            const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
+            const match = markdown.match(frontmatterRegex);
+            
+            if (!match) {
+                return { meta: {}, content: markdown };
+            }
+
+            const yamlText = match[1];
+            const content = match[2];
+            const meta = {};
+
+            yamlText.split('\n').forEach(line => {
+                const colonIndex = line.indexOf(':');
+                if (colonIndex > 0) {
+                    const key = line.substring(0, colonIndex).trim();
+                    let value = line.substring(colonIndex + 1).trim();
+                    if ((value.startsWith('"') && value.endsWith('"')) || 
+                        (value.startsWith("'") && value.endsWith("'"))) {
+                        value = value.slice(1, -1);
+                    }
+                    if (value.includes(',')) {
+                        value = value.split(',').map(v => v.trim());
+                    }
+                    meta[key] = value;
+                }
+            });
+
+            return { meta, content };
+        }
+
+        function generateExcerpt(content, maxLength = 120) {
+            const clean = content
+                .replace(/#{1,6}\s/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                .replace(/`{1,3}[^`]*`{1,3}/g, '')
+                .replace(/\n/g, ' ')
+                .trim();
+            
+            if (clean.length <= maxLength) return clean;
+            return clean.substring(0, maxLength).trim() + '...';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'No date';
+            const date = new Date(dateStr);
+            if (isNaN(date)) return dateStr;
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        async function fetchPost(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch');
+                const markdown = await response.text();
+                const { meta, content } = parseFrontmatter(markdown);
+                
+                return {
+                    url: url,
+                    slug: url.replace(POSTS_DIR, '').replace('.md', ''),
+                    title: meta.title || 'Untitled Post',
+                    date: meta.date || new Date().toISOString(),
+                    description: meta.description || generateExcerpt(content),
+                    categories: Array.isArray(meta.categories) ? meta.categories : 
+                               (meta.categories ? [meta.categories] : []),
+                    tags: Array.isArray(meta.tags) ? meta.tags : 
+                          (meta.tags ? [meta.tags] : []),
+                    image: meta.image || meta.cover || null,
+                    content: content,
+                    rawDate: new Date(meta.date || Date.now())
+                };
+            } catch (error) {
+                console.error('Error fetching post:', url, error);
+                return null;
+            }
+        }
+
+        // === SVG ICONS ===
+        const calendarIcon = `<svg class="meta-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>`;
+        
+        const folderIcon = `<svg class="meta-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>`;
+
+        function renderBlogCard(post) {
+            const categories = post.categories.length > 0 ? post.categories.join(', ') : 'Uncategorized';
+            const imageHtml = post.image 
+                ? `<img src="${post.image}" alt="${post.title}" onerror="this.style.display='none'">`
+                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);color:#444;font-size:0.8rem;">No Image</div>`;
+            
+            return `
+                <a href="post.html?slug=${post.slug}" class="blog-card" onclick="showLoader()">
+                    <div class="blog-card-content">
+                        <h2 class="blog-card-title">${post.title}</h2>
+                        <p class="blog-card-excerpt">${post.description}</p>
+                        <div class="blog-card-meta">
+                            <span>${calendarIcon} ${formatDate(post.date)}</span>
+                            <span>${folderIcon} ${categories}</span>
+                        </div>
+                    </div>
+                    <div class="blog-card-image">
+                        ${imageHtml}
+                    </div>
+                </a>
+            `;
+        }
+
+        function renderRecentPost(post) {
+            const imageHtml = post.image
+                ? `<img src="${post.image}" class="recent-post-img" alt="" onerror="this.style.display='none'">`
+                : `<div class="recent-post-img" style="background:linear-gradient(135deg,#1a1a1a,#2a2a2a);"></div>`;
+            
+            return `
+                <a href="post.html?slug=${post.slug}" class="recent-post" onclick="showLoader()">
+                    ${imageHtml}
+                    <div class="recent-post-info">
+                        <div class="recent-post-title">${post.title}</div>
+                        <div class="recent-post-date">${formatDate(post.date)}</div>
+                    </div>
+                </a>
+            `;
+        }
+
+        function getTrendingTags(posts) {
+            const tagCounts = {};
+            posts.forEach(post => {
+                const allTags = [...post.categories, ...post.tags];
+                allTags.forEach(tag => {
+                    if (tag) tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                });
+            });
+            
+            return Object.entries(tagCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+        }
+
+        function renderTags(tags) {
+            return tags.map(([tag, count]) => `
+                <a href="tags.html?tag=${encodeURIComponent(tag)}" class="tag" onclick="showLoader()">
+                    ${tag}<span class="tag-count">${count}</span>
+                </a>
+            `).join('');
+        }
+
+        function renderPage(posts) {
+            const feed = document.getElementById('blogFeed');
+            const recent = document.getElementById('recentlyUpdated');
+            const tags = document.getElementById('trendingTags');
+
+            if (posts.length === 0) {
+                feed.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No posts found</h3>
+                        <p>Add markdown files to your <code>posts/</code> folder and create a <code>posts.json</code> manifest.</p>
+                        <p style="margin-top:10px;font-size:0.85rem;">Expected format in posts/posts.json: <code>["post1.md", "post2.md"]</code></p>
+                    </div>
+                `;
+                recent.innerHTML = '<p style="color:#666;font-size:0.85rem;">No recent posts</p>';
+                tags.innerHTML = '';
+                return;
+            }
+
+            const sortedPosts = [...posts].sort((a, b) => b.rawDate - a.rawDate);
+            
+            feed.innerHTML = sortedPosts.map(renderBlogCard).join('');
+            
+            const recentPosts = sortedPosts.slice(0, 5);
+            recent.innerHTML = recentPosts.map(renderRecentPost).join('');
+            
+            const trending = getTrendingTags(posts);
+            tags.innerHTML = renderTags(trending);
+        }
+
+        function filterPosts() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            if (!query) {
+                renderPage(allPosts);
+                return;
+            }
+            
+            const filtered = allPosts.filter(post => 
+                post.title.toLowerCase().includes(query) ||
+                post.description.toLowerCase().includes(query) ||
+                post.categories.some(c => c.toLowerCase().includes(query)) ||
+                post.tags.some(t => t.toLowerCase().includes(query))
+            );
+            renderPage(filtered);
+        }
+
+        async function loadPosts() {
+            showLoader();
+            
+            const postUrls = await discoverPosts();
+            
+            if (postUrls.length === 0) {
+                renderPage([]);
+                hideLoader();
+                return;
+            }
+
+            const posts = await Promise.all(postUrls.map(fetchPost));
+            allPosts = posts.filter(p => p !== null);
+            
+            renderPage(allPosts);
+            hideLoader();
+        }
+
+        function startAutoRefresh() {
+            loadPosts();
+            refreshInterval = setInterval(() => {
+                console.log('Refreshing posts...');
+                loadPosts();
+            }, POLL_INTERVAL);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+        }
+
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.menu-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !toggle.contains(e.target) && 
+                sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                startAutoRefresh();
+            }, 600);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        });
+    </script>
+</body>
+</html>

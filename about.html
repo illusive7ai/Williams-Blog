@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - William's Blog</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #2d2d2d;
+            --text-primary: #a0a0a0;
+            --text-active: #e0e0e0;
+            --main-bg: #121212;
+            --border-color: #2a2a2a;
+            --accent-color: #00d4aa;
+            --card-bg: #1a1a1a;
+            --card-hover: #222;
+            --tag-hover-bg: #00d4aa;
+            --tag-hover-text: #121212;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--main-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Bar Loading Animation */
+        .bars-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--main-bg); display: flex; justify-content: center; align-items: center;
+            z-index: 9999; transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .bars-animation.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .bar {
+            width: 8px; height: 60px; background: var(--accent-color); margin: 0 4px;
+            border-radius: 4px; animation: barWave 1.2s ease-in-out infinite;
+            animation-delay: calc(var(--i) * 0.1s); opacity: 0.8;
+        }
+        @keyframes barWave { 0%, 100% { transform: scaleY(0.3); opacity: 0.3; } 50% { transform: scaleY(1); opacity: 1; } }
+
+        .container { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px; background-color: var(--sidebar-bg); position: fixed; height: 100vh;
+            left: 0; top: 0; display: flex; flex-direction: column; align-items: center;
+            padding: 40px 0 20px 0; border-right: 1px solid var(--border-color); z-index: 1000;
+            transition: transform 0.3s ease; flex-shrink: 0;
+        }
+        .profile-section { text-align: center; margin-bottom: 40px; width: 100%; padding: 0 20px; }
+        .profile-img { width: 110px; height: 110px; border-radius: 50%; overflow: hidden; margin: 0 auto 20px; border: 2px solid #3a3a3a; }
+        .profile-img img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; color: #d0d0d0; letter-spacing: 0.5px; }
+        .profile-tagline { font-size: 0.85rem; color: var(--text-primary); font-style: italic; font-weight: 400; }
+
+        .nav-menu { width: 100%; list-style: none; padding: 0 15px; flex: 1; }
+        .nav-item { margin-bottom: 4px; }
+        .nav-link {
+            display: flex; align-items: center; padding: 12px 16px; color: var(--text-primary);
+            text-decoration: none; border-radius: 8px; transition: all 0.2s ease; font-size: 0.85rem;
+            font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+        }
+        .nav-link:hover, .nav-link.active { background-color: var(--sidebar-hover); color: var(--text-active); }
+        .nav-icon { width: 18px; height: 18px; margin-right: 14px; display: flex; align-items: center; justify-content: center; opacity: 0.7; }
+        .nav-link:hover .nav-icon, .nav-link.active .nav-icon { opacity: 1; }
+        .nav-icon svg { width: 100%; height: 100%; fill: currentColor; }
+
+        .social-links { display: flex; gap: 12px; padding: 20px; justify-content: center; }
+        .social-link {
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            color: var(--text-primary); text-decoration: none; border-radius: 50%; background-color: #2a2a2a;
+            transition: all 0.2s ease;
+        }
+        .social-link:hover { background-color: #3a3a3a; color: var(--text-active); transform: translateY(-2px); }
+        .social-link svg { width: 16px; height: 16px; fill: currentColor; }
+
+        /* Main Content */
+        .main-content { margin-left: 260px; flex: 1; min-width: 0; min-height: 100vh; padding: 30px; max-width: calc(100vw - 260px); }
+
+        .breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 30px; font-size: 0.85rem; color: #666; }
+        .breadcrumb a { color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; }
+        .breadcrumb a:hover { opacity: 0.8; text-decoration: underline; }
+        .breadcrumb-separator { color: #444; }
+        .breadcrumb-current { color: var(--text-primary); }
+
+        .page-title { font-size: 1.8rem; color: var(--text-active); font-weight: 700; margin-bottom: 30px; }
+
+        .content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 30px; max-width: 100%; }
+
+        .about-content { display: flex; flex-direction: column; gap: 24px; }
+
+        .info-banner {
+            display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+            background: rgba(0, 212, 170, 0.08); border: 1px solid rgba(0, 212, 170, 0.2);
+            border-radius: 12px; color: var(--accent-color); font-size: 0.95rem;
+        }
+        .info-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--accent-color); }
+        .info-icon svg { width: 100%; height: 100%; fill: currentColor; }
+        .info-banner code { background: rgba(0, 212, 170, 0.15); padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 0.85em; }
+
+        /* Knight Arena */
+        .knight-arena {
+            position: relative; width: 100%; height: 420px;
+            background: #0a0a0f; border-radius: 16px; overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        #knightCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .arena-overlay {
+            position: absolute; bottom: 20px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            pointer-events: none; z-index: 10;
+        }
+        .score-board { display: flex; flex-direction: column; gap: 4px; }
+        .score-label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
+        .score-value { font-size: 1.5rem; color: var(--accent-color); font-weight: 700; font-family: 'Consolas', 'Monaco', monospace; }
+        .virus-count { color: #ff4757; }
+
+        .about-section { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; }
+        .about-section h2 { font-size: 1.2rem; color: var(--text-active); margin-bottom: 12px; font-weight: 600; }
+        .about-section p { font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); margin-bottom: 12px; }
+        .about-section p:last-child { margin-bottom: 0; }
+        .about-section a { color: var(--accent-color); text-decoration: none; }
+        .about-section a:hover { text-decoration: underline; }
+
+        .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 16px; }
+        .skill-tag {
+            padding: 8px 12px; background: #2a2a2a; border-radius: 8px; font-size: 0.8rem;
+            color: var(--text-primary); text-align: center; border: 1px solid var(--border-color); transition: all 0.2s;
+        }
+        .skill-tag:hover { background: var(--accent-color); color: var(--tag-hover-text); border-color: var(--accent-color); transform: translateY(-2px); }
+
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+        .stat-card {
+            background: #2a2a2a; border-radius: 10px; padding: 16px; text-align: center;
+            border: 1px solid var(--border-color); transition: all 0.2s;
+        }
+        .stat-card:hover { border-color: var(--accent-color); transform: translateY(-2px); }
+        .stat-number { font-size: 1.5rem; color: var(--accent-color); font-weight: 700; font-family: 'Consolas', 'Monaco', monospace; }
+        .stat-label { font-size: 0.75rem; color: #666; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Sidebar Widgets */
+        .sidebar-widgets { display: flex; flex-direction: column; gap: 24px; width: 320px; min-width: 320px; max-width: 320px; flex-shrink: 0; }
+        .widget { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; width: 100%; }
+        .widget-title { font-size: 1rem; color: var(--text-active); margin-bottom: 16px; font-weight: 600; }
+
+        .recent-post-text { display: block; padding: 10px 0; text-decoration: none; color: inherit; border-bottom: 1px solid var(--border-color); transition: color 0.2s; word-wrap: break-word; }
+        .recent-post-text:last-child { border-bottom: none; }
+        .recent-post-text:hover { color: var(--text-active); }
+        .recent-post-text-title { font-size: 0.9rem; color: var(--text-primary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+        .recent-post-text:hover .recent-post-text-title { color: var(--accent-color); }
+
+        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag {
+            padding: 6px 14px; background: #2a2a2a; border-radius: 20px; font-size: 0.8rem;
+            color: var(--text-primary); text-decoration: none; transition: all 0.25s ease;
+            border: 1px solid transparent; white-space: nowrap;
+        }
+        .tag:hover {
+            background: var(--tag-hover-bg); color: var(--tag-hover-text); border-color: var(--tag-hover-bg);
+            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 212, 170, 0.25); font-weight: 600;
+        }
+        .tag-count { margin-left: 4px; opacity: 0.6; transition: opacity 0.25s ease; }
+        .tag:hover .tag-count { opacity: 0.8; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-primary); }
+        .empty-state h3 { color: var(--text-active); margin-bottom: 10px; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--main-bg); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        .menu-toggle {
+            display: none; position: fixed; top: 20px; left: 20px; z-index: 1001;
+            background: var(--sidebar-bg); border: 1px solid var(--border-color);
+            color: var(--text-primary); padding: 10px; border-radius: 6px; cursor: pointer; font-size: 1.2rem;
+        }
+
+        @media (max-width: 1100px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .sidebar-widgets { width: 100%; min-width: 0; max-width: 100%; flex-direction: row; flex-wrap: wrap; }
+            .widget { flex: 1; min-width: 300px; max-width: 100%; }
+            .knight-arena { height: 340px; }
+            .stats-row { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px; max-width: 100vw; }
+            .menu-toggle { display: block; }
+            .sidebar-widgets { width: 100%; min-width: 0; }
+            .skills-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Bar Loading Animation -->
+    <div class="bars-animation" id="loader">
+        <div class="bar" style="--i:1;"></div>
+        <div class="bar" style="--i:2;"></div>
+        <div class="bar" style="--i:3;"></div>
+        <div class="bar" style="--i:4;"></div>
+        <div class="bar" style="--i:5;"></div>
+        <div class="bar" style="--i:6;"></div>
+    </div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="profile-section">
+                <div class="profile-img">
+                    <img src="assets/profile.jpg" alt="William's Profile Picture">
+                </div>
+                <h2 class="profile-name">William's Blog</h2>
+                <p class="profile-tagline">I Hack So You Don't Have To</p>
+            </div>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2.1L1 12h3v8h6v-6h4v6h6v-8h3L12 2.1zm0 2.2l6 5.4V18h-2v-6h-4v6H8v-8.3l6-5.4z"/>
+                                </svg>
+                            </span>
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="categories.html" class="nav-link" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
+                                </svg>
+                            </span>
+                            Categories
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tags.html" class="nav-link" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+                                </svg>
+                            </span>
+                            Tags
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="archives.html" class="nav-link" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                </svg>
+                            </span>
+                            Archives
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="about.html" class="nav-link active" onclick="showLoader()">
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                </svg>
+                            </span>
+                            About
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="social-links">
+                <a href="https://github.com/illusive7ai" class="social-link" title="GitHub" target="_blank">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://twitter.com/yourusername" class="social-link" title="Twitter / X" target="_blank">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                </a>
+                <a href="mailto:williamkitungo@gmail.com" class="social-link" title="Email">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                </a>
+                <a href="https://www.linkedin.com/in/william-kitungo7" class="social-link" title="LinkedIn" target="_blank">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="index.html" onclick="showLoader()">Home</a>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-current">About</span>
+            </div>
+
+            <h1 class="page-title">About</h1>
+
+            <div class="content-grid">
+                <!-- About Content -->
+                <div class="about-content">
+                    <!-- Info Banner -->
+                    <div class="info-banner">
+                        <span class="info-icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                        </span>
+                        <span>Add Markdown syntax content to file <code>_tabs/about.md</code> and it will show up on this page.</span>
+                    </div>
+
+                    <!-- Hacker Knight Animation -->
+                    <div class="knight-arena">
+                        <canvas id="knightCanvas"></canvas>
+                        <div class="arena-overlay">
+                            <div class="score-board">
+                                <div class="score-label">Viruses Slashed</div>
+                                <div class="score-value" id="slashCount">0</div>
+                            </div>
+                            <div class="score-board">
+                                <div class="score-label">Threats Neutralized</div>
+                                <div class="score-value virus-count" id="virusCount">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Who Am I -->
+                    <div class="about-section">
+                        <h2>Who Am I</h2>
+                        <p>I'm <strong>William</strong>, a cybersecurity enthusiast and ethical hacker on a mission to make the digital world a safer place. By day, I dissect malware and hunt vulnerabilities. By night, I document my findings so you don't have to learn the hard way.</p>
+                        <p>My philosophy is simple: <em>"I Hack So You Don't Have To"</em> — I break things intentionally so you can understand how to protect them.</p>
+                    </div>
+
+                    <!-- What I Do -->
+                    <div class="about-section">
+                        <h2>The Battlefield</h2>
+                        <p>Like the knight in the animation above, I fight daily battles against digital threats. From penetration testing and vulnerability research to malware analysis and forensics — every exploit I discover is another virus slashed from the system.</p>
+                        <p>This blog serves as my battlefield log, documenting CTF walkthroughs, security tools, and defensive strategies.</p>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="about-section">
+                        <h2>Battle Stats</h2>
+                        <div class="stats-row">
+                            <div class="stat-card">
+                                <div class="stat-number" id="postCount">--</div>
+                                <div class="stat-label">Posts Published</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="ctfCount">12</div>
+                                <div class="stat-label">CTFs Completed</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="toolCount">8</div>
+                                <div class="stat-label">Tools Built</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="about-section">
+                        <h2>Arsenal</h2>
+                        <p>Technologies and methodologies I wield in my security operations:</p>
+                        <div class="skills-grid">
+                            <div class="skill-tag">Penetration Testing</div>
+                            <div class="skill-tag">Malware Analysis</div>
+                            <div class="skill-tag">Reverse Engineering</div>
+                            <div class="skill-tag">Digital Forensics</div>
+                            <div class="skill-tag">Binary Exploitation</div>
+                            <div class="skill-tag">Web Security</div>
+                            <div class="skill-tag">Network Security</div>
+                            <div class="skill-tag">Cryptography</div>
+                            <div class="skill-tag">OSINT</div>
+                            <div class="skill-tag">Social Engineering</div>
+                            <div class="skill-tag">Python</div>
+                            <div class="skill-tag">C/C++</div>
+                            <div class="skill-tag">Assembly</div>
+                            <div class="skill-tag">Bash</div>
+                            <div class="skill-tag">Kali Linux</div>
+                            <div class="skill-tag">Burp Suite</div>
+                        </div>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="about-section">
+                        <h2>Secure Channel</h2>
+                        <p>Found a vulnerability? Want to collaborate on a security project? Or just want to discuss the latest exploit techniques?</p>
+                        <p>Reach me at <a href="mailto:williamkitungo@gmail.com">williamkitungo@gmail.com</a> or connect on <a href="https://www.linkedin.com/in/william-kitungo7" target="_blank">LinkedIn</a>. My <a href="https://github.com/illusive7ai" target="_blank">GitHub</a> is open for contributions and security tools.</p>
+                        <p><em>Remember: In cybersecurity, we don't hide from threats — we hunt them.</em></p>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar Widgets -->
+                <div class="sidebar-widgets">
+                    <!-- Recently Updated - TEXT ONLY -->
+                    <div class="widget">
+                        <h3 class="widget-title">Recently Updated</h3>
+                        <div id="recentlyUpdated"></div>
+                    </div>
+
+                    <!-- Trending Tags -->
+                    <div class="widget">
+                        <h3 class="widget-title">Trending Tags</h3>
+                        <div class="tags-container" id="trendingTags"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============================================
+        // ABOUT PAGE - Realistic Knight + Tech Hardware BG + Guaranteed Slaying
+        // ============================================
+
+        const POSTS_DIR = 'posts/';
+        const POLL_INTERVAL = 60000;
+        let allPosts = [];
+        let refreshInterval;
+
+        // ============================================
+        // HACKER KNIGHT CANVAS ANIMATION
+        // ============================================
+        const canvas = document.getElementById('knightCanvas');
+        const ctx = canvas.getContext('2d');
+        let slashScore = 0;
+        let virusScore = 0;
+        let frameCount = 0;
+
+        function resizeCanvas() {
+            const arena = canvas.parentElement;
+            canvas.width = arena.offsetWidth;
+            canvas.height = arena.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Realistic Knight with human proportions and detailed armor
+        const knight = {
+            x: 80,
+            y: 0,
+            width: 70,
+            height: 140,
+            vy: 0,
+            jumping: false,
+            slashTimer: 0,
+            slashActive: false,
+            slashCooldown: 0,
+            color: '#00d4aa',
+            glow: 0,
+            facingRight: true,
+            walkCycle: 0,
+            targetVirus: null
+        };
+
+        const groundY = () => canvas.height - 50;
+
+        let viruses = [];
+        let particles = [];
+        let circuitLines = [];
+        let dataPackets = [];
+        let glowNodes = [];
+
+        // Initialize tech hardware background elements
+        function initTechBackground() {
+            circuitLines = [];
+            glowNodes = [];
+            dataPackets = [];
+            
+            // Horizontal circuit traces (motherboard style)
+            for (let i = 0; i < 15; i++) {
+                circuitLines.push({
+                    x1: Math.random() * canvas.width,
+                    y1: Math.random() * (canvas.height - 100),
+                    x2: Math.random() * canvas.width,
+                    y2: Math.random() * (canvas.height - 100),
+                    width: Math.random() * 2 + 0.5,
+                    color: Math.random() > 0.7 ? '#00d4aa' : '#1a3a3a',
+                    alpha: Math.random() * 0.4 + 0.1,
+                    pulseSpeed: Math.random() * 0.02 + 0.01,
+                    pulseOffset: Math.random() * Math.PI * 2
+                });
+            }
+            
+            // Vertical bus lines
+            for (let i = 0; i < 8; i++) {
+                const x = Math.random() * canvas.width;
+                circuitLines.push({
+                    x1: x, y1: 0,
+                    x2: x, y2: canvas.height - 50,
+                    width: Math.random() * 3 + 1,
+                    color: '#0d3328',
+                    alpha: 0.15,
+                    pulseSpeed: 0,
+                    pulseOffset: 0,
+                    isBus: true
+                });
+            }
+            
+            // CPU / Chip nodes
+            for (let i = 0; i < 6; i++) {
+                glowNodes.push({
+                    x: Math.random() * (canvas.width - 100) + 50,
+                    y: Math.random() * (canvas.height - 150) + 50,
+                    size: Math.random() * 20 + 10,
+                    color: Math.random() > 0.5 ? '#00d4aa' : '#ff4757',
+                    pulse: Math.random() * Math.PI * 2,
+                    pulseSpeed: Math.random() * 0.03 + 0.01
+                });
+            }
+        }
+
+        function spawnVirus() {
+            if (viruses.length >= 4) return; // Max 4 viruses at once
+            const types = ['🦠', '👾', '🐛', '💀', '☠️', '🕷️', '🦂', '🐝', '🧬', '🔓'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const startY = groundY() - 40 - Math.random() * (canvas.height - 250);
+            viruses.push({
+                x: canvas.width + 40,
+                y: startY,
+                targetY: startY,
+                size: 22 + Math.random() * 14,
+                speed: 1.5 + Math.random() * 1.5,
+                type: type,
+                wobble: Math.random() * Math.PI * 2,
+                hp: 1,
+                flash: 0,
+                spawnTime: Date.now()
+            });
+        }
+
+        function createParticles(x, y, color, count = 15) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
+                const speed = Math.random() * 6 + 2;
+                particles.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 2,
+                    life: 1,
+                    color: color,
+                    size: Math.random() * 4 + 1,
+                    gravity: 0.15
+                });
+            }
+        }
+
+        function createSlashTrail(x, y) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 40,
+                    y: y + (Math.random() - 0.5) * 30,
+                    vx: (Math.random() - 0.3) * 10,
+                    vy: (Math.random() - 0.5) * 4,
+                    life: 1,
+                    color: '#00ffcc',
+                    size: Math.random() * 3 + 1,
+                    gravity: 0,
+                    isTrail: true
+                });
+            }
+        }
+
+        function createDataBurst(x, y) {
+            // Digital "0" and "1" particles
+            for (let i = 0; i < 10; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: -Math.random() * 4 - 1,
+                    life: 1,
+                    color: '#00d4aa',
+                    size: 12,
+                    gravity: 0.05,
+                    isText: true,
+                    text: Math.random() > 0.5 ? '1' : '0'
+                });
+            }
+        }
+
+        // Draw realistic human knight with plate armor
+        function drawKnight() {
+            const gY = groundY();
+            const kx = knight.x;
+            const ky = gY - knight.height + 10;
+            
+            ctx.save();
+            ctx.translate(kx, ky);
+            
+            // Breathing / idle animation
+            const breath = Math.sin(Date.now() / 800) * 1;
+            const walkBob = knight.slashActive ? 0 : Math.sin(knight.walkCycle) * 2;
+            
+            ctx.translate(0, breath + walkBob);
+            
+            // Glow aura
+            ctx.shadowColor = knight.color;
+            ctx.shadowBlur = 15 + Math.sin(Date.now() / 200) * 5;
+            
+            // === HELMET (Great Helm style) ===
+            // Helmet dome
+            ctx.fillStyle = '#2a2a3e';
+            ctx.beginPath();
+            ctx.ellipse(35, 12, 18, 20, 0, Math.PI, 0);
+            ctx.fill();
+            
+            // Helmet top ridge
+            ctx.fillStyle = '#3a3a50';
+            ctx.fillRect(30, -8, 10, 10);
+            
+            // Visor (T-shaped opening)
+            ctx.fillStyle = '#0a0a14';
+            ctx.beginPath();
+            ctx.moveTo(22, 8);
+            ctx.lineTo(48, 8);
+            ctx.lineTo(45, 28);
+            ctx.lineTo(25, 28);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Visor horizontal slit
+            ctx.fillStyle = knight.color;
+            ctx.shadowBlur = 20;
+            ctx.fillRect(26, 16, 18, 3);
+            // Glowing eyes behind visor
+            ctx.fillStyle = '#00ffcc';
+            ctx.beginPath();
+            ctx.arc(30, 20, 2.5, 0, Math.PI * 2);
+            ctx.arc(40, 20, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Helmet side hinges
+            ctx.fillStyle = '#4a4a60';
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(18, 15, 4, 0, Math.PI * 2);
+            ctx.arc(52, 15, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // === NECK / GORGET ===
+            ctx.fillStyle = '#2d2d40';
+            ctx.fillRect(28, 28, 14, 8);
+            
+            // === SHOULDERS (Pauldrons) ===
+            ctx.fillStyle = '#2a2a3e';
+            // Left pauldron
+            ctx.beginPath();
+            ctx.ellipse(18, 40, 14, 12, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            // Right pauldron
+            ctx.beginPath();
+            ctx.ellipse(52, 40, 14, 12, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            // Pauldron ridges
+            ctx.strokeStyle = '#3a3a50';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(18, 40, 10, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(52, 40, 10, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // === CHEST PLATE (Cuirass) ===
+            ctx.fillStyle = '#252538';
+            ctx.beginPath();
+            ctx.moveTo(22, 42);
+            ctx.lineTo(48, 42);
+            ctx.lineTo(45, 75);
+            ctx.lineTo(25, 75);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Chest plate center line
+            ctx.strokeStyle = '#3a3a50';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(35, 42);
+            ctx.lineTo(35, 75);
+            ctx.stroke();
+            
+            // Chest glow core (heart of the system)
+            ctx.fillStyle = knight.color;
+            ctx.shadowColor = knight.color;
+            ctx.shadowBlur = 25;
+            ctx.beginPath();
+            ctx.arc(35, 58, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // === ARMS ===
+            // Left arm
+            ctx.fillStyle = '#2d2d40';
+            ctx.fillRect(8, 45, 10, 28);
+            // Left gauntlet
+            ctx.fillStyle = '#1e1e30';
+            ctx.fillRect(6, 70, 14, 12);
+            
+            // Right arm (sword arm) - animated during slash
+            ctx.save();
+            if (knight.slashActive) {
+                const slashProgress = knight.slashTimer / 12;
+                const armAngle = -Math.PI / 2 - Math.sin(slashProgress * Math.PI) * 1.2;
+                ctx.translate(52, 48);
+                ctx.rotate(armAngle);
+                ctx.fillStyle = '#2d2d40';
+                ctx.fillRect(-5, 0, 10, 26);
+                // Gauntlet
+                ctx.fillStyle = '#1e1e30';
+                ctx.fillRect(-7, 24, 14, 12);
+            } else {
+                ctx.fillStyle = '#2d2d40';
+                ctx.fillRect(52, 45, 10, 28);
+                ctx.fillStyle = '#1e1e30';
+                ctx.fillRect(50, 70, 14, 12);
+            }
+            ctx.restore();
+            
+            // === CAPE ===
+            ctx.fillStyle = '#1a1a2e';
+            ctx.beginPath();
+            ctx.moveTo(20, 38);
+            ctx.lineTo(50, 38);
+            ctx.lineTo(55, 90);
+            ctx.lineTo(15, 90);
+            ctx.closePath();
+            ctx.fill();
+            // Cape inner lining
+            ctx.fillStyle = '#0d0d1a';
+            ctx.beginPath();
+            ctx.moveTo(25, 40);
+            ctx.lineTo(45, 40);
+            ctx.lineTo(48, 85);
+            ctx.lineTo(22, 85);
+            ctx.closePath();
+            ctx.fill();
+            
+            // === LEGS ===
+            // Left leg
+            ctx.fillStyle = '#2d2d40';
+            ctx.fillRect(22, 75, 11, 32);
+            // Right leg
+            ctx.fillRect(37, 75, 11, 32);
+            
+            // Knee guards (Poleyn)
+            ctx.fillStyle = '#3a3a50';
+            ctx.beginPath();
+            ctx.arc(27.5, 90, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(42.5, 90, 7, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // === BOOTS (Sabatons) ===
+            ctx.fillStyle = '#1e1e30';
+            // Left boot
+            ctx.fillRect(20, 105, 15, 14);
+            ctx.fillRect(20, 115, 18, 8);
+            // Right boot
+            ctx.fillRect(35, 105, 15, 14);
+            ctx.fillRect(35, 115, 18, 8);
+            
+            // === SWORD ===
+            ctx.save();
+            if (knight.slashActive) {
+                const slashProgress = knight.slashTimer / 12;
+                ctx.translate(52, 48);
+                // Dramatic slash arc
+                const slashAngle = -Math.PI / 3 - Math.sin(slashProgress * Math.PI) * 2.5;
+                ctx.rotate(slashAngle);
+                ctx.translate(0, -20);
+            } else {
+                ctx.translate(58, 55);
+                ctx.rotate(-Math.PI / 8);
+            }
+            
+            // Sword blade (broad, tech-style)
+            const bladeGrad = ctx.createLinearGradient(0, -60, 0, 0);
+            bladeGrad.addColorStop(0, '#e0e8ff');
+            bladeGrad.addColorStop(0.5, '#a0b0d0');
+            bladeGrad.addColorStop(1, '#607080');
+            
+            ctx.fillStyle = bladeGrad;
+            ctx.shadowColor = '#00ffcc';
+            ctx.shadowBlur = knight.slashActive ? 30 : 15;
+            
+            // Blade shape
+            ctx.beginPath();
+            ctx.moveTo(-4, 0);
+            ctx.lineTo(-3, -70);
+            ctx.lineTo(0, -78); // Tip
+            ctx.lineTo(3, -70);
+            ctx.lineTo(4, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Blade core glow line
+            ctx.strokeStyle = '#00ffcc';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -5);
+            ctx.lineTo(0, -72);
+            ctx.stroke();
+            
+            // Crossguard (tech style)
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#4a5a6a';
+            ctx.fillRect(-14, -2, 28, 6);
+            // Crossguard tech details
+            ctx.fillStyle = knight.color;
+            ctx.fillRect(-10, -1, 4, 4);
+            ctx.fillRect(6, -1, 4, 4);
+            
+            // Hilt
+            ctx.fillStyle = '#2a1a0a';
+            ctx.fillRect(-3, 4, 6, 18);
+            // Hilt wrapping texture
+            ctx.strokeStyle = '#4a3a2a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(-3, 6 + i * 4);
+                ctx.lineTo(3, 8 + i * 4);
+                ctx.stroke();
+            }
+            
+            // Pommel
+            ctx.fillStyle = '#4a5a6a';
+            ctx.beginPath();
+            ctx.arc(0, 24, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = knight.color;
+            ctx.beginPath();
+            ctx.arc(0, 24, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+            
+            // === SHIELD (Left arm - Tech Tower Shield) ===
+            ctx.save();
+            ctx.translate(12, 65);
+            ctx.rotate(0.1);
+            
+            // Shield body
+            ctx.fillStyle = '#2a2a3e';
+            ctx.beginPath();
+            ctx.moveTo(-5, -20);
+            ctx.lineTo(15, -15);
+            ctx.lineTo(12, 25);
+            ctx.lineTo(-2, 30);
+            ctx.lineTo(-8, 20);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#3a3a50';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Shield tech pattern
+            ctx.strokeStyle = knight.color;
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(0, -10);
+            ctx.lineTo(8, -8);
+            ctx.lineTo(6, 15);
+            ctx.lineTo(-2, 18);
+            ctx.closePath();
+            ctx.stroke();
+            
+            // Shield core
+            ctx.fillStyle = knight.color;
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath();
+            ctx.arc(3, 2, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+            
+            ctx.restore();
+        }
+
+        function drawVirus(v) {
+            ctx.save();
+            ctx.translate(v.x, v.y);
+            
+            // Damage flash
+            if (v.flash > 0) {
+                ctx.globalAlpha = v.flash;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(0, 0, v.size + 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                v.flash -= 0.1;
+            }
+            
+            // Virus glow
+            ctx.shadowColor = '#ff4757';
+            ctx.shadowBlur = 20;
+            
+            // Pulsing body
+            const pulse = Math.sin(Date.now() / 120 + v.wobble) * 3;
+            
+            // Malware body (glitchy square with rounded corners - more "tech" feel)
+            ctx.fillStyle = `rgba(255, 71, 87, ${0.8 + Math.sin(Date.now() / 100) * 0.2})`;
+            ctx.beginPath();
+            const s = v.size + pulse;
+            ctx.roundRect(-s/2, -s/2, s, s, 6);
+            ctx.fill();
+            
+            // Circuit pattern on virus
+            ctx.strokeStyle = '#ff8888';
+            ctx.lineWidth = 1.5;
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.moveTo(-s/3, -s/3);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(s/3, -s/3);
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, s/3);
+            ctx.stroke();
+            
+            // Emoji/icon
+            ctx.font = `${v.size}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(v.type, 0, 0);
+            
+            // Rotating spikes
+            ctx.strokeStyle = '#ff4757';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 8; i++) {
+                const angle = (Date.now() / 400 + v.wobble + i * Math.PI / 4);
+                const innerR = v.size / 2;
+                const outerR = v.size / 2 + 8 + Math.sin(Date.now() / 150) * 3;
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(angle) * innerR, Math.sin(angle) * innerR);
+                ctx.lineTo(Math.cos(angle) * outerR, Math.sin(angle) * outerR);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+
+        function drawParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.life);
+                
+                if (p.isText) {
+                    ctx.font = `bold ${p.size}px monospace`;
+                    ctx.fillStyle = p.color;
+                    ctx.fillText(p.text, p.x, p.y);
+                } else {
+                    ctx.fillStyle = p.color;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = p.isTrail ? 15 : 8;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+                
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity || 0.2;
+                p.life -= p.isTrail ? 0.04 : 0.025;
+                
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function drawTechBackground() {
+            // Base dark tech gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#050508');
+            grad.addColorStop(0.4, '#0a0a12');
+            grad.addColorStop(1, '#0d1a15');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Circuit board traces
+            circuitLines.forEach(line => {
+                const pulse = Math.sin(Date.now() * line.pulseSpeed + line.pulseOffset) * 0.3 + 0.7;
+                ctx.strokeStyle = line.color;
+                ctx.lineWidth = line.width;
+                ctx.globalAlpha = line.alpha * pulse;
+                ctx.shadowColor = line.color;
+                ctx.shadowBlur = line.isBus ? 0 : 5;
+                ctx.beginPath();
+                ctx.moveTo(line.x1, line.y1);
+                ctx.lineTo(line.x2, line.y2);
+                ctx.stroke();
+                
+                // Circuit nodes at intersections
+                if (!line.isBus && Math.random() < 0.01) {
+                    ctx.fillStyle = line.color;
+                    ctx.globalAlpha = pulse;
+                    ctx.beginPath();
+                    ctx.arc(line.x2, line.y2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+            
+            // Glow nodes (CPU chips, capacitors)
+            glowNodes.forEach(node => {
+                node.pulse += node.pulseSpeed;
+                const brightness = Math.sin(node.pulse) * 0.4 + 0.6;
+                
+                // Outer glow
+                ctx.shadowColor = node.color;
+                ctx.shadowBlur = 20 * brightness;
+                ctx.fillStyle = node.color;
+                ctx.globalAlpha = 0.2 * brightness;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.size * 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Core
+                ctx.globalAlpha = 0.6 * brightness;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.size * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Tech ring
+                ctx.strokeStyle = node.color;
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = 0.4 * brightness;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+            
+            // Floating data packets (binary streams)
+            if (Math.random() < 0.05) {
+                dataPackets.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * (canvas.height - 100),
+                    text: Math.random() > 0.5 ? '1' : '0',
+                    speed: Math.random() * 1 + 0.5,
+                    life: 1,
+                    color: Math.random() > 0.8 ? '#00d4aa' : '#1a4a3a'
+                });
+            }
+            
+            for (let i = dataPackets.length - 1; i >= 0; i--) {
+                const dp = dataPackets[i];
+                ctx.font = '10px monospace';
+                ctx.fillStyle = dp.color;
+                ctx.globalAlpha = dp.life * 0.5;
+                ctx.fillText(dp.text, dp.x, dp.y);
+                dp.x += dp.speed;
+                dp.life -= 0.008;
+                if (dp.life <= 0 || dp.x > canvas.width) dataPackets.splice(i, 1);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function drawGround() {
+            const gY = groundY();
+            
+            // Main ground line - circuit trace style
+            ctx.strokeStyle = '#00d4aa';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#00d4aa';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.moveTo(0, gY);
+            ctx.lineTo(canvas.width, gY);
+            ctx.stroke();
+            
+            // Ground grid - PCB traces
+            ctx.strokeStyle = 'rgba(0, 212, 170, 0.08)';
+            ctx.lineWidth = 1;
+            ctx.shadowBlur = 0;
+            
+            // Horizontal traces
+            for (let i = 0; i < 5; i++) {
+                const y = gY + 10 + i * 8;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Vertical vias
+            for (let i = 0; i < canvas.width; i += 60) {
+                ctx.beginPath();
+                ctx.moveTo(i, gY);
+                ctx.lineTo(i - 15, canvas.height);
+                ctx.stroke();
+                
+                // Via holes
+                ctx.fillStyle = 'rgba(0, 212, 170, 0.15)';
+                ctx.beginPath();
+                ctx.arc(i, gY + 5, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Ground plane texture
+            ctx.fillStyle = 'rgba(0, 212, 170, 0.03)';
+            ctx.fillRect(0, gY, canvas.width, canvas.height - gY);
+        }
+
+        // === COLLISION & AI: GUARANTEED VIRUS SLAYING ===
+        function updateKnightAI() {
+            // Find nearest virus
+            let nearest = null;
+            let nearestDist = Infinity;
+            
+            viruses.forEach(v => {
+                const dx = v.x - (knight.x + 50);
+                const dy = v.y - (knight.y + 50);
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearest = v;
+                }
+            });
+            
+            knight.targetVirus = nearest;
+            
+            // Auto-slash when virus is in range AND cooldown is ready
+            if (nearest && !knight.slashActive && knight.slashCooldown <= 0) {
+                const slashRangeX = 160; // Horizontal reach
+                const slashRangeY = 100; // Vertical reach
+                
+                if (nearest.x < knight.x + slashRangeX && nearest.x > knight.x - 20 &&
+                    Math.abs(nearest.y - (groundY() - knight.height / 2)) < slashRangeY) {
+                    knight.slashActive = true;
+                    knight.slashTimer = 0;
+                    knight.slashCooldown = 8; // Brief cooldown between slashes
+                }
+            }
+            
+            if (knight.slashCooldown > 0) knight.slashCooldown--;
+        }
+
+        function checkCollisions() {
+            if (!knight.slashActive) return;
+            
+            // Slash hitbox - large arc area
+            const slashX = knight.x + 55;
+            const slashY = groundY() - knight.height / 2;
+            const slashRange = 90;
+            
+            // Visual slash trail
+            if (knight.slashTimer % 3 === 0) {
+                createSlashTrail(slashX + Math.random() * 40, slashY + (Math.random() - 0.5) * 60);
+            }
+            
+            for (let i = viruses.length - 1; i >= 0; i--) {
+                const v = viruses[i];
+                const dx = v.x - slashX;
+                const dy = v.y - slashY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                // GENEROUS hit detection - knight slashes ALL nearby viruses
+                if (dist < slashRange && v.hp > 0) {
+                    v.hp = 0;
+                    v.flash = 1;
+                    slashScore++;
+                    virusScore++;
+                    document.getElementById('slashCount').textContent = slashScore;
+                    document.getElementById('virusCount').textContent = virusScore;
+                    
+                    // Big explosion
+                    createParticles(v.x, v.y, '#ff4757', 20);
+                    createParticles(v.x, v.y, '#00d4aa', 12);
+                    createParticles(v.x, v.y, '#ffffff', 8);
+                    createDataBurst(v.x, v.y);
+                    
+                    viruses.splice(i, 1);
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            frameCount++;
+            
+            drawTechBackground();
+            drawGround();
+            
+            // Spawn viruses at controlled rate
+            if (frameCount % 80 === 0 && viruses.length < 5) {
+                spawnVirus();
+            }
+            
+            // Update knight AI for guaranteed slaying
+            updateKnightAI();
+            
+            // Update and draw viruses
+            for (let i = viruses.length - 1; i >= 0; i--) {
+                const v = viruses[i];
+                v.x -= v.speed;
+                v.wobble += 0.04;
+                
+                // Slight vertical hover
+                v.y = v.targetY + Math.sin(Date.now() / 300 + v.wobble) * 8;
+                
+                // If virus somehow gets past knight (shouldn't happen), still count it
+                if (v.x < -50) {
+                    viruses.splice(i, 1);
+                } else {
+                    drawVirus(v);
+                }
+            }
+            
+            // Knight slash logic
+            if (knight.slashActive) {
+                knight.slashTimer++;
+                if (knight.slashTimer > 14) {
+                    knight.slashActive = false;
+                    knight.slashTimer = 0;
+                }
+            }
+            
+            // Walk cycle animation
+            if (!knight.slashActive) {
+                knight.walkCycle += 0.08;
+            }
+            
+            checkCollisions();
+            drawKnight();
+            drawParticles();
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize and start
+        initTechBackground();
+        animate();
+
+        // ============================================
+        // BLOG DATA LOADING
+        // ============================================
+
+        async function fetchPostsManifest() {
+            try {
+                const response = await fetch(POSTS_DIR + 'posts.json');
+                if (response.ok) return await response.json();
+            } catch (e) { console.log('No posts.json manifest found...'); }
+            return null;
+        }
+
+        async function discoverPosts() {
+            const manifest = await fetchPostsManifest();
+            if (manifest && Array.isArray(manifest)) return manifest.map(file => POSTS_DIR + file);
+            console.warn('No posts.json manifest found. Please create one.');
+            return [];
+        }
+
+        function parseFrontmatter(markdown) {
+            const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
+            const match = markdown.match(frontmatterRegex);
+            if (!match) return { meta: {}, content: markdown };
+            
+            const yamlText = match[1];
+            const content = match[2];
+            const meta = {};
+            yamlText.split('\n').forEach(line => {
+                const colonIndex = line.indexOf(':');
+                if (colonIndex > 0) {
+                    const key = line.substring(0, colonIndex).trim();
+                    let value = line.substring(colonIndex + 1).trim();
+                    if ((value.startsWith('"') && value.endsWith('"')) || 
+                        (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+                    if (value.includes(',')) value = value.split(',').map(v => v.trim());
+                    meta[key] = value;
+                }
+            });
+            return { meta, content };
+        }
+
+        function generateExcerpt(content, maxLength = 120) {
+            const clean = content
+                .replace(/#{1,6}\s/g, '')
+                .replace(/\*\*/g, '').replace(/\*/g, '')
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                .replace(/`{1,3}[^`]*`{1,3}/g, '')
+                .replace(/\n/g, ' ').trim();
+            if (clean.length <= maxLength) return clean;
+            return clean.substring(0, maxLength).trim() + '...';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'No date';
+            const date = new Date(dateStr);
+            if (isNaN(date)) return dateStr;
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        async function fetchPost(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch');
+                const markdown = await response.text();
+                const { meta, content } = parseFrontmatter(markdown);
+                return {
+                    url: url,
+                    slug: url.replace(POSTS_DIR, '').replace('.md', ''),
+                    title: meta.title || 'Untitled Post',
+                    date: meta.date || new Date().toISOString(),
+                    description: meta.description || generateExcerpt(content),
+                    categories: Array.isArray(meta.categories) ? meta.categories : (meta.categories ? [meta.categories] : []),
+                    tags: Array.isArray(meta.tags) ? meta.tags : (meta.tags ? [meta.tags] : []),
+                    image: meta.image || meta.cover || null,
+                    rawDate: new Date(meta.date || Date.now())
+                };
+            } catch (error) {
+                console.error('Error fetching post:', url, error);
+                return null;
+            }
+        }
+
+        function renderRecentPostText(post) {
+            return `<a href="post.html?slug=${post.slug}" class="recent-post-text" onclick="showLoader()">
+                <div class="recent-post-text-title">${post.title}</div>
+            </a>`;
+        }
+
+        function getTrendingTags(posts) {
+            const tagCounts = {};
+            posts.forEach(post => {
+                const allTags = [...post.categories, ...post.tags];
+                allTags.forEach(tag => { if (tag) tagCounts[tag] = (tagCounts[tag] || 0) + 1; });
+            });
+            return Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        }
+
+        function renderTagsSidebar(tags) {
+            return tags.map(([tag, count]) => `
+                <a href="tags.html?tag=${encodeURIComponent(tag)}" class="tag" onclick="showLoader()">
+                    ${tag}<span class="tag-count">${count}</span>
+                </a>
+            `).join('');
+        }
+
+        function renderPage(posts) {
+            const recent = document.getElementById('recentlyUpdated');
+            const trending = document.getElementById('trendingTags');
+
+            if (posts.length === 0) {
+                recent.innerHTML = '<p style="color:#666;font-size:0.85rem;">No recent posts</p>';
+                trending.innerHTML = '';
+                document.getElementById('postCount').textContent = '0';
+                return;
+            }
+
+            const sortedPosts = [...posts].sort((a, b) => b.rawDate - a.rawDate);
+            const recentPosts = sortedPosts.slice(0, 5);
+            recent.innerHTML = recentPosts.map(renderRecentPostText).join('');
+
+            const trendingTags = getTrendingTags(posts);
+            trending.innerHTML = renderTagsSidebar(trendingTags);
+            document.getElementById('postCount').textContent = posts.length;
+        }
+
+        async function loadPosts() {
+            showLoader();
+            const postUrls = await discoverPosts();
+            if (postUrls.length === 0) { renderPage([]); hideLoader(); return; }
+            const posts = await Promise.all(postUrls.map(fetchPost));
+            allPosts = posts.filter(p => p !== null);
+            renderPage(allPosts);
+            hideLoader();
+        }
+
+        function startAutoRefresh() {
+            loadPosts();
+            refreshInterval = setInterval(() => { loadPosts(); }, POLL_INTERVAL);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+        }
+
+        function showLoader() { document.getElementById('loader').classList.remove('hidden'); }
+        function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.menu-toggle');
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !toggle.contains(e.target) && sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        window.addEventListener('load', function() {
+            setTimeout(() => { startAutoRefresh(); }, 600);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stopAutoRefresh();
+            else startAutoRefresh();
+        });
+    </script>
+</body>
+</html>
